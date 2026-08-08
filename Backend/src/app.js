@@ -12,7 +12,7 @@
  app.use(express.json());
  app.use(cookieParser());
  app.use(cors({
-    origin: "http://localhost:5173",
+    origin: "https://ai-interview-ebon-eight.vercel.app/",
     credentials: true
  }))
  /*require all the routes here*/
