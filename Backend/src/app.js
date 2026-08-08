@@ -12,8 +12,8 @@
  app.use(express.json());
  app.use(cookieParser());
  app.use(cors({
-    origin: "https://ai-interview-ebon-eight.vercel.app/",
-    credentials: true
+    origin: "http://localhost:3000",
+    withCredentials: true
  }))
  /*require all the routes here*/
   const authRoutes = require("./routes/auth.route");
