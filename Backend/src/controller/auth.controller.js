@@ -122,12 +122,25 @@ async function logoutUserController(req,res){
  * @access Private
  */
 async function getmeController(req,res){
-    const user = await userModel.findById(req.user.id)
-    res.status(200).json({
-        id: user._id,
-        username: user.username,
-        email: user.email
-    })
+    try {
+        const user = await userModel.findById(req.user.id)
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" })
+        }
+
+        return res.status(200).json({
+            id: user._id,
+            username: user.username,
+            email: user.email
+        })
+    } catch (error) {
+        console.error("GET_ME_ERROR:", error)
+        return res.status(500).json({
+            message: "Internal Server Error",
+            error: error.message,
+        })
+    }
 }
 
 
