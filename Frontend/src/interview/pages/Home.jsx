@@ -12,11 +12,22 @@ const Home = () => {
   const navigate = useNavigate()
 
   const handleGenerateReport = async () => {
+    console.log("🔥 BUTTON CLICKED");
+
+  try {
+    console.log("📦 Resume:", resume);
+    console.log("💼 Job Description:", jobDescription);
+    console.log("👤 Self Description:", selfDescription);
+
+    // your existing code...
+    
+  } catch (error) {
+    console.error("❌ ERROR:", error);
+  }
     const resumeFile = resumeInputRef.current.files[0] 
     const data = await generateReport({jobDescription, selfDescription, resumeFile})
-    if (data?.id) {
-      navigate(`/interview/${data.id}`)
-    }
+     navigate(`/interview/${data._id}`)
+    
   }
   if(loading){
     return(
@@ -97,6 +108,7 @@ const Home = () => {
       <footer className="footer-panel">
         <p>AI-Powered Strategy Generation · Approx 30s</p>
         <button
+        type = "button"
         onClick={handleGenerateReport}
         className="button primary-button">Generate My Interview Strategy</button>
       </footer>
