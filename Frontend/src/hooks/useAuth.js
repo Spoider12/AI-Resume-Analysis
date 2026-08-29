@@ -8,48 +8,56 @@ export const useAuth = () =>{
     const {user,setUser,loading,setLoading} = context
 
     const handleLogin = async ({email,password}) =>{
-       
         setLoading(true)
         try{
             const data = await login({email,password})
+            if (!data?.user) {
+                setUser(null)
+                return false
+            }
 
-        setUser(data.user)
+            setUser(data.user)
+            return true
         } catch(err){
-
-        }finally{
+            setUser(null)
+            return false
+        } finally{
             setLoading(false)
         }
-        
-        
     }
+
     const handleRegister = async ({username,email,password}) =>{
         setLoading(true)
         try{
             const data = await register({username,email,password})
-        setUser(data.user)
+            if (!data?.user) {
+                setUser(null)
+                return false
+            }
+
+            setUser(data.user)
+            return true
         } catch (err){
-
-        }finally{setLoading(false)
-
-        }
-        
+            setUser(null)
+            return false
+        } finally{setLoading(false)}
     }
+
     const hadlelogout = async () =>{
         setLoading(true)
         try{
-             const data = await logout ()
-        setUser(null)
+            await logout()
+            setUser(null)
         } catch(err){
-
-        }finally{
-       
-        setLoading(false)
+            setUser(null)
+        } finally{
+            setLoading(false)
         }
     }
 
-     useEffect(()=>{
+    useEffect(()=>{
         const getAndSetUser = async()=>{
-            setLoading(true);
+            setLoading(true)
 
             try {
               const data = await getMe()
@@ -59,9 +67,11 @@ export const useAuth = () =>{
                 setUser(null)
             } finally{
                  setLoading(false)
-            }   
-        } 
+            }
+        }
+
         getAndSetUser()
     },[])
+
     return {user,loading,hadlelogout,handleRegister,handleLogin}
 }

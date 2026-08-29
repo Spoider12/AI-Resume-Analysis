@@ -1,54 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import '../style/interview.scss'
 import { useInterview } from '../hooks/useInterview.js'
+import { useNavigate, useParams } from 'react-router'
 
-import { useParams } from 'react-router'
 
-const reportData = {
-    title: 'Software Engineer (Full-Stack Developer) - Interview Preparation Report',
-    matchScore: 90,
-    summary: 'You have strong MERN-stack fundamentals and practical project experience that align well with a full-stack developer role.',
-    strengths: [
-        'Strong hands-on MERN stack experience',
-        'Good grasp of REST APIs and JWT auth',
-        'Practical real-time app experience with Socket.IO',
-        'Solid project-driven problem solving'
-    ],
-    weaknesses: [
-        'TypeScript and cloud deployment are improvement areas',
-        'Testing and CI/CD experience can be strengthened',
-        'Broader system design depth would help in senior roles'
-    ],
-    technicalQuestions: [
-        {
-            question: 'Explain the core components of the MERN stack and how they interact.',
-            intention: 'To test your understanding of full-stack architecture.',
-            answer: 'MongoDB handles persistent data, Express handles the backend server logic, React renders the UI, and Node executes JavaScript on the server side.'
-        },
-        {
-            question: 'How would you build a real-time messaging feature with Socket.IO?',
-            intention: 'To evaluate real-time system implementation experience.',
-            answer: 'I would use persistent WebSocket connections, room-based events, and server-side broadcasting to deliver instant updates to connected clients.'
-        }
-    ],
-    behavioralQuestions: [
-        {
-            question: 'Tell me about a time you worked with a team to deliver a project.',
-            intention: 'To assess collaboration and ownership.',
-            answer: 'I focused on clear communication, shared responsibilities, and quick iteration while making sure the project stayed aligned with the deadline.'
-        }
-    ],
-    preparationPlan: [
-        { day: 1, focus: 'MERN stack deep dive', tasks: ['Review API design', 'Practice auth flow questions'] },
-        { day: 2, focus: 'Real-time systems', tasks: ['Rebuild a chat flow', 'Discuss scaling tradeoffs'] },
-        { day: 3, focus: 'DSA refresh', tasks: ['Practice arrays and trees', 'Write clean solutions'] }
-    ],
-    skillGaps: [
-        { skill: 'TypeScript', severity: 'medium' },
-        { skill: 'Docker', severity: 'medium' },
-        { skill: 'AWS', severity: 'low' }
-    ]
-}
 
 const NAV_ITEMS = [
     { id: 'technical', label: 'Technical Questions', icon: (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>) },
@@ -104,30 +59,16 @@ const RoadMapDay = ({ day }) => (
 // ── Main Component ────────────────────────────────────────────────────────────
 const Interview = () => {
     const [ activeNav, setActiveNav ] = useState('technical')
-   
-    const [ report, setReport ] = useState(null)
-    const [ loading, setLoading ] = useState(true)
+    const { report, getReportById, loading, getResumePdf } = useInterview()
     const { interviewId } = useParams()
-
-    const getReportById = (id) => {
-        setLoading(true)
-        setTimeout(() => {
-            setReport({ ...reportData, interviewId: id })
-            setLoading(false)
-        }, 250)
-    }
-
-    const getResumePdf = (id) => {
-        console.info('Resume download requested for:', id)
-    }
 
     useEffect(() => {
         if (interviewId) {
             getReportById(interviewId)
-        } else {
-            getReportById('demo')
         }
     }, [ interviewId ])
+
+
 
     if (loading || !report) {
         return (
@@ -140,6 +81,7 @@ const Interview = () => {
     const scoreColor =
         report.matchScore >= 80 ? 'score--high' :
             report.matchScore >= 60 ? 'score--mid' : 'score--low'
+
 
     return (
         <div className='interview-page'>

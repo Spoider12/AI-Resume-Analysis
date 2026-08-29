@@ -1,56 +1,113 @@
-import {getAllInterviewReports,getInterviewReportById,generateInterviewReport} from "../services/interview.api"
-import {useContext} from "react"
+import { getAllInterviewReports, generateInterviewReport, getInterviewReportById } from "../services/interview.api"
+import { useContext, useEffect } from "react"
 import { InterviewContext } from "../interviewContext"
+import { useParams } from "react-router"
 
+export const useInterview = () => {
+    const context = useContext(InterviewContext)
+    const { interviewId } = useParams()
 
-export const useInterview = () =>{
-const context = useContext(InterviewContext)
-
-if(!context){
-    throw new Error ("useInterview must be used within an InterviewProvider")
-}
-const {loading ,setLoading,report ,setReport,reports,setReports} = context
-
-const generateReport = async ({jobDescription , selfDescription , resumeFile}) =>{
-    setLoading(true)
-    let response = null
-    try {
-         response = await generateInterviewReport({jobDescription , selfDescription , resumeFile})
-        setReport(response.interviewReport)
-        return response
-    } catch (error) {
-        console.error("Error generating interview report:", error)
-        return null
-    } finally {
-        setLoading(false)
+    if (!context) {
+        throw new Error("useInterview must be used within an InterviewProvider")
     }
-    return response.interviewReport
-}
-const getReportById = async (interviewId) =>{
-    setLoading(true)
-    let response = null
-    try {
-         response = await getInterviewReportById(interviewId)
-        setReport(response.interviewReport)
-    } catch (error) {
-        console.error("Error fetching interview report:", error)
-    } finally {
-        setLoading(false)
+
+    const { loading, setLoading, report, setReport, reports, setReports } = context
+
+    const generateReport = async ({ jobDescription, selfDescription, resumeFile }) => {
+        setLoading(true)
+        let response = null
+
+        try {
+            response = await generateInterviewReport({ jobDescription, selfDescription, resumeFile })
+            const interviewReport = response?.interviewReport ?? null
+            if (interviewReport) {
+                setReport(interviewReport)
+            }
+            return interviewReport
+        } catch (error) {
+            console.error(error)
+            return null
+        } finally {
+            setLoading(false)
+        }
     }
-    return response.interviewReport
-}
-const getReports = async () =>{
-    setLoading(true)
-    let response = null
-    try {
-         response = await getAllInterviewReports()
-        setReports(response.interviewReport)
-    } catch (error) {
-        console.error("Error fetching all interview reports:", error)
-    } finally { 
-        setLoading(false)
+
+    const getReportById = async (id) => {
+        setLoading(true)
+        let response = null
+
+        try {
+            response = await getInterviewReportById(id)
+            const interviewReport = response?.interviewReport ?? null
+            if (interviewReport) {
+                setReport(interviewReport)
+            }
+            return interviewReport
+        } catch (error) {
+            console.error(error)
+            return null
+        } finally {
+            setLoading(false)
+        }
     }
-    return response.interviewReport
-}
-return {loading,setLoading,report,setReport,reports,setReports,generateReport,getReportById,getReports}
+
+    const getReports = async () => {
+        setLoading(true)
+        let response = null
+
+        try {
+            response = await getAllInterviewReports()
+            const nextReports = response?.interviewReports ?? []
+            setReports(nextReports)
+            return nextReports
+        } catch (error) {
+            console.error(error)
+            setReports([])
+            return []
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const getResumePdf = async (interviewReportId) => {
+        if (!interviewReportId) return null
+
+        setLoading(true)
+
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/interview/report/${interviewReportId}/resume`, {
+                credentials: "include",
+            })
+
+            if (!response.ok) {
+                throw new Error("Resume download endpoint is not available")
+            }
+
+            const blob = await response.blob()
+            const url = window.URL.createObjectURL(blob)
+            const link = document.createElement("a")
+            link.href = url
+            link.setAttribute("download", `resume_${interviewReportId}.pdf`)
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+            window.URL.revokeObjectURL(url)
+            return true
+        } catch (error) {
+            console.error(error)
+            return null
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        if (interviewId) {
+            getReportById(interviewId)
+        } else {
+            getReports()
+        }
+    }, [interviewId])
+
+    return { loading, report, reports, generateReport, getReportById, getReports, getResumePdf }
 }

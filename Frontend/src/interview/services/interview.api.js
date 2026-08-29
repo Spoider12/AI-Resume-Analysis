@@ -1,27 +1,36 @@
 import axios from "axios";
-import { useAsyncError } from "react-router";
+
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
     withCredentials: true,
-})
+});
 
-export const generateInterviewReport = async ({jobDescription,selfDescription ,resumeFile}) =>{
-    const formData = new FormData()
-     formData.append("jobDescription", jobDescription)
-     formData.append("selfDescription", selfDescription)
-     formData.append("resume", resumeFile)
+export const generateInterviewReport = async ({
+    jobDescription,
+    selfDescription,
+    resumeFile,
+}) => {
+    const formData = new FormData();
 
-     const response = await api.post("/api/interview/", formData)
-     return response.data
-}
+    formData.append("jobDescription", jobDescription);
+    formData.append("selfDescription", selfDescription);
+    formData.append("resume", resumeFile);
 
-export const getInterviewReportById = async (interviewId) =>{
-    const response = await api.get(`/api/interview/report/${interviewId}`)
+    const response = await api.post("/api/interview/", formData);
 
-    return response.data
-}
-export const getAllInterviewReports = async () =>{
-    const response = await api.get("/api/interview/")
+    return response.data;
+};
 
-    return response.data
-}
+export const getInterviewReportById = async (interviewId) => {
+    const response = await api.get(
+        `/api/interview/report/${interviewId}`
+    );
+
+    return response.data;
+};
+
+export const getAllInterviewReports = async () => {
+    const response = await api.get("/api/interview/");
+
+    return response.data;
+};
