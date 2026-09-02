@@ -7,7 +7,16 @@ const {resume , selfDescription , jobDescription} = require ("./src/services/tem
 const generateInterviewReport = require("./src/services/ai.service")
 
 connectDB();
-generateInterviewReport({resume, selfDescription,jobDescription})
+
+async function runStartupReport() {
+  try {
+    await generateInterviewReport({resume, selfDescription,jobDescription});
+  } catch (error) {
+    console.error("Startup interview report failed:", error.message);
+  }
+}
+
+runStartupReport();
 
 const port = process.env.PORT || 3000;
 
