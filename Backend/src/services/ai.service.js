@@ -1,6 +1,6 @@
 const { GoogleGenAI } = require("@google/genai");
 const ai = new GoogleGenAI({
-  apiKey: process.env.GOOGLE_GENAI_API_KEY,
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 const interviewReportSchema = {
@@ -188,7 +188,7 @@ ${jobDescription}
 `;
 
   const response = await ai.models.generateContent({
-    model: "gemini-3.6-flash",
+    model: "openai/gpt-oss-120b",
     contents: prompt,
       tools: [
         { type: "google_search" }
