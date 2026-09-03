@@ -69,6 +69,18 @@ async function generateInterviewReportController(req, res) {
             });
         }
 
+        if (
+            error?.status === 401 ||
+            error?.status === 403 ||
+            error?.status === 404 ||
+            error?.status === 503
+        ) {
+            return res.status(503).json({
+                message: "The AI service is temporarily unavailable.",
+                details: error?.message || String(error)
+            });
+        }
+
         return res.status(500).json({
             message: "Failed to generate interview report.",
             error: error?.message || "Internal server error"
