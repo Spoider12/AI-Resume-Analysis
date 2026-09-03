@@ -1,5 +1,5 @@
-const { GoogleGenAI } = require("@google/genai");
-const ai = new GoogleGenAI({
+const Groq = require("groq-sdk");
+const ai = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
@@ -187,19 +187,24 @@ Job Description:
 ${jobDescription}
 `;
 
-  const response = await ai.models.generateContent({
+  const response = await ai.chat.completions.create({
     model: "openai/gpt-oss-120b",
-    contents: prompt,
-      tools: [
-        { type: "google_search" }
-      ],
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: interviewReportSchema,
+    messages: [
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+    temperature: 1,
+    max_completion_tokens: 2048,
+    top_p: 1,
+    reasoning_effort: "medium",
+    response_format: {
+      type: "json_object",
     },
   });
 
-  const report = JSON.parse(response.text);
+  const report = JSON.parse(response.choices[0].message.content);
 
   console.log(report);
   return report;
