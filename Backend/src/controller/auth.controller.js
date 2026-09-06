@@ -144,9 +144,6 @@ async function getmeController(req,res){
         })
     }
 }
-
-
-
 module.exports = {
     registerUserController,
     loginUserController,

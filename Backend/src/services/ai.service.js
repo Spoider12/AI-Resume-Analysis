@@ -172,10 +172,19 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
   const prompt = `
 Generate an interview preparation report.
 
-Return ONLY valid JSON.
-Do not add extra keys.
-Follow exactly this structure:
-matchScore, technicalQuestions, behavioralQuestions, skillGaps, preparationPlan, title.
+Return ONLY valid JSON. Do not use markdown or code fences.
+Include every field in this exact structure, using [] for an empty array and
+an empty string only where a text value is genuinely unavailable:
+title, matchScore, summary, strengths, weaknesses, technicalQuestions,
+behavioralQuestions, codingQuestions, projectQuestions, skillGaps,
+preparationPlan, resumeSuggestions, atsKeywordsMissing, interviewerTips,
+salaryConfidence, finalVerdict.
+
+Each technical question must include question, difficulty, intention, answer,
+and followUp. Each behavioral question must include question, intention, and
+answer. Each skill gap must include skill, severity, whyImportant, and
+learningResource. Each preparation day must include day, focus, and tasks.
+salaryConfidence must include confidence and reason.
 
 Candidate Resume:
 ${resume}
@@ -196,7 +205,7 @@ ${jobDescription}
       },
     ],
     temperature: 1,
-    max_completion_tokens: 2048,
+    max_completion_tokens: 8192,
     top_p: 1,
     reasoning_effort: "medium",
     response_format: {

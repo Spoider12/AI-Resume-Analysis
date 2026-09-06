@@ -75,7 +75,7 @@ export const useInterview = () => {
         setLoading(true)
 
         try {
-            const response = await fetch(`/api/interview/report/${interviewReportId}/resume`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/interview/report/${interviewReportId}/resume`, {
                 credentials: "include",
             })
 
