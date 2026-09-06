@@ -168,6 +168,48 @@ const interviewReportSchema = {
   ]
 };
 
+function normalizeReport(report) {
+  return {
+    ...report,
+    technicalQuestions: (report.technicalQuestions || []).map((item) => ({
+      ...item,
+      followUp: Array.isArray(item.followUp)
+        ? item.followUp
+        : item.followUp
+          ? [item.followUp]
+          : [],
+    })),
+    codingQuestions: (report.codingQuestions || []).map((item) => ({
+      ...item,
+      topic: item.topic || item.title || "General coding",
+      question: item.question || item.title || "Solve this coding problem.",
+      expectedApproach: item.expectedApproach || "Explain the algorithm, complexity, and edge cases.",
+    })),
+    projectQuestions: (report.projectQuestions || []).map((item) => ({
+      ...item,
+      project: item.project || "Candidate project",
+      reason: item.reason || item.intention || "Assess project understanding.",
+      idealAnswer: item.idealAnswer || item.answer || "Explain the design, tradeoffs, and results.",
+    })),
+    skillGaps: (report.skillGaps || []).map((item) => ({
+      ...item,
+      severity: String(item.severity || "low").toLowerCase(),
+    })),
+    preparationPlan: (report.preparationPlan || []).map((item, index) => ({
+      ...item,
+      day: Number.parseInt(item.day, 10) || index + 1,
+    })),
+    salaryConfidence: report.salaryConfidence
+      ? {
+          ...report.salaryConfidence,
+          confidence: report.salaryConfidence.confidence === "Moderate"
+            ? "Medium"
+            : report.salaryConfidence.confidence,
+        }
+      : report.salaryConfidence,
+  };
+}
+
 async function generateInterviewReport({ resume, selfDescription, jobDescription }) {
   const prompt = `
 Generate an interview preparation report.
@@ -213,9 +255,8 @@ ${jobDescription}
     },
   });
 
-  const report = JSON.parse(response.choices[0].message.content);
+  const report = normalizeReport(JSON.parse(response.choices[0].message.content));
 
-  console.log(report);
   return report;
 }
 

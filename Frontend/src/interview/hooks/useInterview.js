@@ -25,7 +25,7 @@ export const useInterview = () => {
             }
             return interviewReport
         } catch (error) {
-            console.error(error)
+            console.error("Report generation failed:", error.response?.data || error.message)
             return null
         } finally {
             setLoading(false)
