@@ -223,7 +223,8 @@ preparationPlan, resumeSuggestions, atsKeywordsMissing, interviewerTips,
 salaryConfidence, finalVerdict.
 
 Each technical question must include question, difficulty, intention, answer,
-and followUp. Each behavioral question must include question, intention, and
+and followUp. Difficulty is mandatory and must be exactly one of Easy, Medium,
+or Hard. Never omit the difficulty field. Each behavioral question must include question, intention, and
 answer. Each skill gap must include skill, severity, whyImportant, and
 learningResource. Each preparation day must include day, focus, and tasks.
 salaryConfidence must include confidence and reason.
