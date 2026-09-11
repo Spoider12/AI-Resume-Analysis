@@ -19,6 +19,11 @@ const QuestionCard = ({ item, index }) => {
             <div className='q-card__header' onClick={() => setOpen(o => !o)}>
                 <span className='q-card__index'>Q{index + 1}</span>
                 <p className='q-card__question'>{item.question}</p>
+                {item.difficulty && (
+                    <span className={`q-card__difficulty q-card__difficulty--${item.difficulty.toLowerCase()}`}>
+                        {item.difficulty}
+                    </span>
+                )}
                 <span className={`q-card__chevron ${open ? 'q-card__chevron--open' : ''}`}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
                 </span>
@@ -33,6 +38,16 @@ const QuestionCard = ({ item, index }) => {
                         <span className='q-card__tag q-card__tag--answer'>Model Answer</span>
                         <p>{item.answer}</p>
                     </div>
+                    {Array.isArray(item.followUp) && item.followUp.length > 0 && (
+                        <div className='q-card__section'>
+                            <span className='q-card__tag q-card__tag--follow-up'>Follow-up Questions</span>
+                            <ul className='q-card__follow-up'>
+                                {item.followUp.map((followUpQuestion, followUpIndex) => (
+                                    <li key={followUpIndex}>{followUpQuestion}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
@@ -81,6 +96,11 @@ const Interview = () => {
     const scoreColor =
         report.matchScore >= 80 ? 'score--high' :
             report.matchScore >= 60 ? 'score--mid' : 'score--low'
+
+    const matchMessage =
+        report.matchScore >= 80 ? 'Strong match for this role' :
+            report.matchScore >= 60 ? 'Good match for this role' :
+                'Needs improvement for this role'
 
 
     return (
@@ -169,7 +189,7 @@ const Interview = () => {
                             <span className='match-score__value'>{report.matchScore}</span>
                             <span className='match-score__pct'>%</span>
                         </div>
-                        <p className='match-score__sub'>Strong match for this role</p>
+                        <p className='match-score__sub'>{matchMessage}</p>
                     </div>
 
                     <div className='sidebar-divider' />

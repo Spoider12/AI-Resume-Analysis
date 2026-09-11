@@ -206,6 +206,33 @@ $severity-low: #3fb950;
         line-height: 1.5;
     }
 
+    &__difficulty {
+        flex-shrink: 0;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 0.15rem 0.45rem;
+        border-radius: 0.25rem;
+        border: 1px solid;
+
+        &--easy {
+            color: $severity-low;
+            background-color: rgba($severity-low, 0.1);
+            border-color: rgba($severity-low, 0.25);
+        }
+
+        &--medium {
+            color: $severity-medium;
+            background-color: rgba($severity-medium, 0.1);
+            border-color: rgba($severity-medium, 0.25);
+        }
+
+        &--hard {
+            color: $severity-high;
+            background-color: rgba($severity-high, 0.1);
+            border-color: rgba($severity-high, 0.25);
+        }
+    }
+
     &__chevron {
         flex-shrink: 0;
         color: $text-muted;
@@ -260,6 +287,20 @@ $severity-low: #3fb950;
             background-color: rgba(#3fb950, 0.1);
             border: 1px solid rgba(#3fb950, 0.2);
         }
+
+        &--follow-up {
+            color: #38bdf8;
+            background-color: rgba(#38bdf8, 0.1);
+            border: 1px solid rgba(#38bdf8, 0.2);
+        }
+    }
+
+    &__follow-up {
+        margin: 0;
+        padding-left: 1.2rem;
+        color: color.adjust($text-muted, $lightness: 15%);
+        font-size: 0.835rem;
+        line-height: 1.6;
     }
 }
 
