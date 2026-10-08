@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import '../style/interview.scss'
 import { useInterview } from '../hooks/useInterview.js'
-import { useNavigate, useParams } from 'react-router'
+import { useParams } from 'react-router'
 
 
 
 const NAV_ITEMS = [
     { id: 'technical', label: 'Technical Questions', icon: (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>) },
     { id: 'behavioral', label: 'Behavioral Questions', icon: (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>) },
+    { id: 'skills', label: 'Skill Gaps & Resources', icon: (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>) },
     { id: 'roadmap', label: 'Road Map', icon: (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11" /></svg>) },
 ]
+
+const isSafeResourceUrl = (url) => typeof url === 'string' && /^https?:\/\//i.test(url)
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 const QuestionCard = ({ item, index }) => {
@@ -159,6 +162,55 @@ const Interview = () => {
                                     <QuestionCard key={i} item={q} index={i} />
                                 ))}
                             </div>
+                        </section>
+                    )}
+
+                    {activeNav === 'skills' && (
+                        <section>
+                            <div className='content-header'>
+                                <h2>Skill Gaps & Learning Resources</h2>
+                                <span className='content-header__count'>{report.skillGaps?.length || 0} skills</span>
+                            </div>
+                            {report.skillGaps?.length ? (
+                                <div className='skill-resource-list'>
+                                    {report.skillGaps.map((gap, index) => (
+                                        <article className='skill-resource-card' key={`${gap.skill}-${index}`}>
+                                            <div className='skill-resource-card__header'>
+                                                <h3>{gap.skill}</h3>
+                                                <span className={`skill-tag skill-tag--${gap.severity || 'low'}`}>
+                                                    {gap.severity || 'low'} priority
+                                                </span>
+                                            </div>
+                                            {gap.whyImportant && <p className='skill-resource-card__description'>{gap.whyImportant}</p>}
+                                            {gap.learningResource && <p className='skill-resource-card__resource'>{gap.learningResource}</p>}
+                                            {gap.estimatedLearningTime && (
+                                                <p className='skill-resource-card__time'>Estimated learning time: {gap.estimatedLearningTime}</p>
+                                            )}
+                                            {Array.isArray(gap.referenceLinks) && gap.referenceLinks.length > 0 && (
+                                                <div className='skill-resource-card__links'>
+                                                    <h4>Learning resources</h4>
+                                                    <ul>
+                                                        {gap.referenceLinks.map((link, linkIndex) => (
+                                                            <li key={`${link.url}-${linkIndex}`}>
+                                                                {isSafeResourceUrl(link.url) ? (
+                                                                    <a href={link.url} target='_blank' rel='noopener noreferrer'>
+                                                                        {link.title || link.platform || link.url}
+                                                                    </a>
+                                                                ) : (
+                                                                    <span>{link.title || link.platform || 'Learning resource'}</span>
+                                                                )}
+                                                                {link.platform && <span className='skill-resource-card__platform'>{link.platform}</span>}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </article>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className='skill-resource-empty'>No skill gaps were identified for this report.</p>
+                            )}
                         </section>
                     )}
 

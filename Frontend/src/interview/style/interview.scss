@@ -519,3 +519,90 @@ $severity-low: #3fb950;
         border-color: rgba($severity-low, 0.25);
     }
 }
+
+.skill-resource-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.skill-resource-card {
+    padding: 1.1rem;
+    background-color: $bg-panel;
+    border: 1px solid $border-color;
+    border-radius: 0.7rem;
+
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+
+        h3 {
+            margin: 0;
+            color: $text-primary;
+            font-size: 1rem;
+        }
+    }
+
+    &__description,
+    &__resource,
+    &__time {
+        color: color.adjust($text-muted, $lightness: 15%);
+        font-size: 0.85rem;
+        line-height: 1.6;
+    }
+
+    &__time {
+        color: $text-primary;
+        font-weight: 600;
+    }
+
+    &__links {
+        margin-top: 1rem;
+
+        h4 {
+            margin: 0 0 0.6rem;
+            color: $text-primary;
+            font-size: 0.85rem;
+        }
+
+        ul {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        li {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        a {
+            color: #7cc7ff;
+            overflow-wrap: anywhere;
+
+            &:hover {
+                color: $text-primary;
+            }
+        }
+    }
+
+    &__platform {
+        padding: 0.15rem 0.5rem;
+        border: 1px solid $border-color;
+        border-radius: 1rem;
+        color: $text-muted;
+        font-size: 0.7rem;
+    }
+}
+
+.skill-resource-empty {
+    color: $text-muted;
+    font-size: 0.9rem;
+}

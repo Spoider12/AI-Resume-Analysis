@@ -45,7 +45,9 @@ export async function getMe(){
         const response = await api.get("/api/auth/get-me")
         return response.data
     } catch (err){
-        console.error(err)
+        if (err.response?.status !== 401) {
+            console.error(err)
+        }
         throw err
     }
 }

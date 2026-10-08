@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import "../style/home.scss"
 import { useInterview } from '../hooks/useInterview.js'
 import { useNavigate } from 'react-router'
@@ -9,12 +9,35 @@ const Home = () => {
     const [ jobDescription, setJobDescription ] = useState("")
     const [ selfDescription, setSelfDescription ] = useState("")
     const [ resumeFile, setResumeFile ] = useState(null)
+    const [ formError, setFormError ] = useState("")
     const resumeInputRef = useRef()
 
     const navigate = useNavigate()
 
     const handleGenerateReport = async () => {
-        const selectedResume = resumeInputRef.current.files[0]
+        const selectedResume = resumeInputRef.current.files[0] || null
+
+        if (!jobDescription.trim()) {
+            setFormError("Enter the job description to generate your interview plan.")
+            return
+        }
+
+        if (!selectedResume && !selfDescription.trim()) {
+            setFormError("Upload a PDF resume or enter a self-description.")
+            return
+        }
+
+        if (selectedResume && !selectedResume.name.toLowerCase().endsWith(".pdf")) {
+            setFormError("Please upload your resume as a PDF file.")
+            return
+        }
+
+        if (selectedResume && selectedResume.size > 3 * 1024 * 1024) {
+            setFormError("The PDF must be 3 MB or smaller.")
+            return
+        }
+
+        setFormError("")
         const data = await generateReport({ jobDescription, selfDescription, resumeFile: selectedResume })
 
         if (!data || !data._id) {
@@ -90,7 +113,7 @@ const Home = () => {
                                     {resumeFile ? resumeFile.name : 'Click to upload or drag &amp; drop'}
                                 </p>
                                 <p className='dropzone__subtitle'>
-                                    {resumeFile ? `${(resumeFile.size / (1024 * 1024)).toFixed(2)} MB selected` : 'PDF or DOCX (Max 5MB)'}
+                                    {resumeFile ? `${(resumeFile.size / (1024 * 1024)).toFixed(2)} MB selected` : 'PDF (Max 3MB)'}
                                 </p>
                                 <input
                                     ref={resumeInputRef}
@@ -98,7 +121,7 @@ const Home = () => {
                                     type='file'
                                     id='resume'
                                     name='resume'
-                                    accept='.pdf,.docx'
+                                    accept='.pdf,application/pdf'
                                     onChange={(e) => setResumeFile(e.target.files[0] || null)}
                                 />
                             </label>
@@ -134,7 +157,10 @@ const Home = () => {
 
                 {/* Card Footer */}
                 <div className='interview-card__footer'>
-                    <span className='footer-info'>AI-Powered Strategy Generation &bull; Approx 30s</span>
+                    <div>
+                        {formError && <p className='form-error' role='alert'>{formError}</p>}
+                        <span className='footer-info'>AI-Powered Strategy Generation &bull; Approx 30s</span>
+                    </div>
                     <button
                         onClick={handleGenerateReport}
                         className='generate-btn'>
