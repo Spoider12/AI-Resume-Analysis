@@ -96,9 +96,43 @@ const interviewReportSchema = {
             enum: ["low", "medium", "high"]
           },
           whyImportant: { type: "string" },
-          learningResource: { type: "string" }
+          learningResource: { type: "string" },
+          referenceLinks: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                title: { type: "string" },
+                url: { type: "string" },
+                platform: { type: "string" }
+              },
+              required: ["title", "url"]
+            }
+          },
+          estimatedLearningTime: { type: "string" }
         },
         required: ["skill", "severity", "whyImportant", "learningResource"]
+      }
+    },
+
+    skillGapQuestions: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          skill: { type: "string" },
+          question: { type: "string" },
+          difficulty: {
+            type: "string",
+            enum: ["Easy", "Medium", "Hard"]
+          },
+          whyAsked: { type: "string" },
+          keyPoints: {
+            type: "array",
+            items: { type: "string" }
+          }
+        },
+        required: ["skill", "question", "difficulty", "whyAsked"]
       }
     },
 
@@ -159,6 +193,7 @@ const interviewReportSchema = {
     "codingQuestions",
     "projectQuestions",
     "skillGaps",
+    "skillGapQuestions",
     "preparationPlan",
     "resumeSuggestions",
     "atsKeywordsMissing",
@@ -169,6 +204,93 @@ const interviewReportSchema = {
 };
 
 function normalizeReport(report) {
+  const normalizeLearningResource = (resource, skill, referenceLinks) => {
+    if (typeof resource === "string" && resource.trim()) {
+      return resource.trim();
+    }
+
+    if (resource && typeof resource === "object" && !Array.isArray(resource)) {
+      const description = [
+        resource.description,
+        resource.summary,
+        resource.title,
+        resource.name,
+        resource.resource,
+        resource.url,
+      ]
+        .filter((value) => typeof value === "string" && value.trim())
+        .join(" — ");
+
+      if (description) {
+        return description;
+      }
+
+      return JSON.stringify(resource);
+    }
+
+    if (Array.isArray(resource)) {
+      const descriptions = resource
+        .map((item) => {
+          if (typeof item === "string") {
+            return item.trim();
+          }
+
+          if (item && typeof item === "object") {
+            return [item.title, item.url, item.description]
+              .filter((value) => typeof value === "string" && value.trim())
+              .join(" — ");
+          }
+
+          return "";
+        })
+        .filter(Boolean);
+
+      if (descriptions.length > 0) {
+        return descriptions.join("; ");
+      }
+    }
+
+    if (referenceLinks.length > 0) {
+      return `Study ${skill} using the reference links provided.`;
+    }
+
+    console.warn(`AI did not provide a learning resource for skill gap "${skill}".`);
+    return `Study ${skill} using a trusted learning resource.`;
+  };
+
+  const rawSalaryConfidence = report.salaryConfidence?.confidence;
+  const normalizedSalaryConfidence = String(rawSalaryConfidence || "")
+    .trim()
+    .toLowerCase();
+  const confidenceAliases = {
+    low: "Low",
+    "low confidence": "Low",
+    medium: "Medium",
+    moderate: "Medium",
+    "medium confidence": "Medium",
+    "moderate confidence": "Medium",
+    high: "High",
+    "high confidence": "High",
+  };
+
+  let salaryConfidence = report.salaryConfidence;
+
+  if (report.salaryConfidence) {
+    let confidence = confidenceAliases[normalizedSalaryConfidence];
+
+    if (!confidence) {
+      console.warn(
+        `AI returned an unrecognized salary confidence (${String(rawSalaryConfidence)}); using Medium.`
+      );
+      confidence = "Medium";
+    }
+
+    salaryConfidence = {
+      ...report.salaryConfidence,
+      confidence,
+    };
+  }
+
   return {
     ...report,
     technicalQuestions: (report.technicalQuestions || []).map((item) => ({
@@ -191,43 +313,78 @@ function normalizeReport(report) {
       reason: item.reason || item.intention || "Assess project understanding.",
       idealAnswer: item.idealAnswer || item.answer || "Explain the design, tradeoffs, and results.",
     })),
-    skillGaps: (report.skillGaps || []).map((item) => ({
+    skillGaps: (report.skillGaps || []).map((item) => {
+      const referenceLinks = Array.isArray(item.referenceLinks)
+        ? item.referenceLinks
+        : [];
+
+      return {
+        ...item,
+        severity: String(item.severity || "low").toLowerCase(),
+        learningResource: normalizeLearningResource(
+          item.learningResource,
+          item.skill || "this skill",
+          referenceLinks
+        ),
+        referenceLinks,
+        estimatedLearningTime: item.estimatedLearningTime || "2-4 hours",
+      };
+    }),
+    skillGapQuestions: (report.skillGapQuestions || []).map((item) => ({
       ...item,
-      severity: String(item.severity || "low").toLowerCase(),
+      difficulty: item.difficulty || "Medium",
+      keyPoints: Array.isArray(item.keyPoints) ? item.keyPoints : [],
     })),
     preparationPlan: (report.preparationPlan || []).map((item, index) => ({
       ...item,
       day: Number.parseInt(item.day, 10) || index + 1,
     })),
-    salaryConfidence: report.salaryConfidence
-      ? {
-          ...report.salaryConfidence,
-          confidence: report.salaryConfidence.confidence === "Moderate"
-            ? "Medium"
-            : report.salaryConfidence.confidence,
-        }
-      : report.salaryConfidence,
+    salaryConfidence,
   };
 }
 
 async function generateInterviewReport({ resume, selfDescription, jobDescription }) {
   const prompt = `
-Generate an interview preparation report.
+Generate a comprehensive interview preparation report with STRONG FOCUS on SKILL GAPS.
+
+CRITICAL: Analyze the Job Description and Resume carefully:
+1. Identify ALL skills/technologies mentioned in Job Description
+2. Compare with Resume to find MISSING SKILLS (skills in job description but NOT in resume)
+3. Generate targeted interview questions specifically about these missing skill gaps
+4. Include reference links to authoritative learning resources
 
 Return ONLY valid JSON. Do not use markdown or code fences.
 Include every field in this exact structure, using [] for an empty array and
 an empty string only where a text value is genuinely unavailable:
 title, matchScore, summary, strengths, weaknesses, technicalQuestions,
-behavioralQuestions, codingQuestions, projectQuestions, skillGaps,
+behavioralQuestions, codingQuestions, projectQuestions, skillGaps, skillGapQuestions,
 preparationPlan, resumeSuggestions, atsKeywordsMissing, interviewerTips,
 salaryConfidence, finalVerdict.
 
-Each technical question must include question, difficulty, intention, answer,
-and followUp. Difficulty is mandatory and must be exactly one of Easy, Medium,
-or Hard. Never omit the difficulty field. Each behavioral question must include question, intention, and
-answer. Each skill gap must include skill, severity, whyImportant, and
-learningResource. Each preparation day must include day, focus, and tasks.
+SKILL GAPS REQUIREMENTS:
+- Each skill gap MUST have: skill, severity (low/medium/high), whyImportant, learningResource
+- learningResource MUST be a plain text string, never an object or array
+- MUST include referenceLinks array with objects containing: title, url, platform
+- Include estimatedLearningTime (e.g., "2-4 hours", "1-2 days", "1 week")
+- Severity should be HIGH for critical skills, MEDIUM for important skills, LOW for nice-to-have
+
+REFERENCE LINKS REQUIREMENTS:
+- Provide 2-3 authoritative learning resources per skill gap
+- Include platforms like: GeeksforGeeks, W3Schools, MDN Web Docs, freeCodeCamp, Coursera, Udemy, YouTube Channels
+- Ensure URLs are real and accessible
+- Format: { "title": "Topic name - Source", "url": "https://exact.url", "platform": "GeeksforGeeks/W3Schools/etc" }
+
+SKILL GAP QUESTIONS REQUIREMENTS:
+- For each HIGH/MEDIUM severity skill gap, create 1-2 interview questions
+- Each question MUST have: skill, question, difficulty (Easy/Medium/Hard), whyAsked, keyPoints
+- These questions should test understanding of the missing skill
+- Questions should be specific to the job description requirements
+
+Each technical question must include question, difficulty, intention, answer, and followUp.
+Each behavioral question must include question, intention, and answer.
+Each preparation day must include day, focus, and tasks.
 salaryConfidence must include confidence and reason.
+salaryConfidence.confidence must be exactly "Low", "Medium", or "High" (case-sensitive).
 
 Candidate Resume:
 ${resume}
@@ -237,6 +394,8 @@ ${selfDescription}
 
 Job Description:
 ${jobDescription}
+
+IMPORTANT: Generate skillGapQuestions array focusing on MISSING skills from the job description that aren't in the resume. These are critical for the interview.
 `;
 
   const response = await ai.chat.completions.create({

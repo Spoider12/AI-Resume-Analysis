@@ -9,44 +9,65 @@ async function generateInterviewReportController(req, res) {
     try {
         const resumeFile = req.file;
         const { selfDescription, jobDescription } = req.body;
+        const normalizedSelfDescription = typeof selfDescription === "string"
+            ? selfDescription.trim()
+            : "";
+        const normalizedJobDescription = typeof jobDescription === "string"
+            ? jobDescription.trim()
+            : "";
 
-        if (!resumeFile) {
+        if (!normalizedJobDescription) {
             return res.status(400).json({
-                message: "Resume file is required for this request."
+                message: "Job description is required."
             });
         }
 
-        if (!resumeFile.buffer) {
+        if (!resumeFile && !normalizedSelfDescription) {
             return res.status(400).json({
-                message: "Resume file buffer is missing. Check Multer configuration."
+                message: "Upload a PDF resume or provide a self-description."
             });
         }
 
-        // pdf-parse v2 syntax
-        parser = new PDFParse({
-            data: resumeFile.buffer
-        });
+        let resumeText = "";
 
-        const resumeContent = await parser.getText();
-        const resumeText = resumeContent.text;
+        if (resumeFile) {
+            if (!resumeFile.originalname?.toLowerCase().endsWith(".pdf")) {
+                return res.status(400).json({
+                    message: "Unsupported resume format. Please upload a PDF file."
+                });
+            }
 
-        if (!resumeText || !resumeText.trim()) {
-            return res.status(400).json({
-                message: "Could not extract text from the uploaded PDF."
+            if (!resumeFile.buffer) {
+                return res.status(400).json({
+                    message: "Resume file buffer is missing. Check Multer configuration."
+                });
+            }
+
+            parser = new PDFParse({
+                data: resumeFile.buffer
             });
+
+            const resumeContent = await parser.getText();
+            resumeText = resumeContent.text?.trim() || "";
+
+            if (!resumeText) {
+                return res.status(400).json({
+                    message: "Could not extract text from the uploaded PDF."
+                });
+            }
         }
 
         const interviewReportByAi = await generateInterviewReport({
             resume: resumeText,
-            selfDescription,
-            jobDescription
+            selfDescription: normalizedSelfDescription,
+            jobDescription: normalizedJobDescription
         });
 
         const interviewReport = await interviewReportModel.create({
             user: req.user.id,
             resume: resumeText,
-            selfDescription,
-            jobDescription,
+            selfDescription: normalizedSelfDescription,
+            jobDescription: normalizedJobDescription,
             ...interviewReportByAi
         });
 
@@ -146,6 +167,7 @@ async function getAllInterviewReportsController(req, res) {
                 "-technicalQuestions " +
                 "-behavioralQuestions " +
                 "-skillGaps " +
+                "-skillGapQuestions " +
                 "-preparationPlan"
             );
 

@@ -102,6 +102,23 @@ const skillGapSchema = new mongoose.Schema({
     learningResource: {
         type: String,
         required: [true, "Learning resource is required"]
+    },
+    referenceLinks: [{
+        title: {
+            type: String,
+            required: [true, "Reference link title is required"]
+        },
+        url: {
+            type: String,
+            required: [true, "Reference link URL is required"]
+        },
+        platform: {
+            type: String
+        }
+    }],
+    estimatedLearningTime: {
+        type: String,
+        default: "2-4 hours"
     }
 }, {
     _id: false
@@ -119,6 +136,31 @@ const preparationPlanSchema = new mongoose.Schema({
     tasks: [{
         type: String,
         required: [true, "Task is required"]
+    }]
+}, {
+    _id: false
+});
+
+const skillGapQuestionSchema = new mongoose.Schema({
+    skill: {
+        type: String,
+        required: [true, "Skill is required"]
+    },
+    question: {
+        type: String,
+        required: [true, "Skill gap question is required"]
+    },
+    difficulty: {
+        type: String,
+        enum: ["Easy", "Medium", "Hard"],
+        required: [true, "Difficulty is required"]
+    },
+    whyAsked: {
+        type: String,
+        required: [true, "Why asked is required"]
+    },
+    keyPoints: [{
+        type: String
     }]
 }, {
     _id: false
@@ -186,6 +228,8 @@ const interviewReportSchema = new mongoose.Schema({
     projectQuestions: [projectQuestionSchema],
 
     skillGaps: [skillGapSchema],
+
+    skillGapQuestions: [skillGapQuestionSchema],
 
     preparationPlan: [preparationPlanSchema],
     user:{
