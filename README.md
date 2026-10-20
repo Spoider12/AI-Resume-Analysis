@@ -59,9 +59,16 @@ Create a `.env` file in the project root:
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_long_random_secret
 GROQ_API_KEY=your_groq_api_key
+CORS_ORIGINS=https://ai-resume-analysis-3ldp.onrender.com
 ```
 
 Do not commit `.env` or share its contents publicly.
+
+For deployment, set `CORS_ORIGINS` in the backend service's environment to the
+frontend's exact origin (scheme and hostname, with no path or trailing slash).
+Multiple origins can be separated by commas. The frontend must also set
+`VITE_API_BASE_URL` to the backend service's base URL and be rebuilt/redeployed
+after changing it.
 
 ### 4. Run the application locally
 

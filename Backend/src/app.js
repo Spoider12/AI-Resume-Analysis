@@ -9,7 +9,9 @@ app.use(cookieParser());
 
 const allowedOrigins = [
     "http://localhost:5173",
-     "https://ai-resume-analysis-phi.vercel.app"
+    "https://ai-resume-analysis-phi.vercel.app",
+    "https://ai-resume-analysis-3ldp.onrender.com",
+    ...(process.env.CORS_ORIGINS || "")
         .split(",")
         .map((origin) => origin.trim())
         .filter(Boolean),
