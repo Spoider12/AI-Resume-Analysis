@@ -9,7 +9,7 @@ app.use(cookieParser());
 
 const allowedOrigins = [
     "http://localhost:5173",
-    ...(process.env.FRONTEND_URL || "")
+     "https://ai-resume-analysis-phi.vercel.app"
         .split(",")
         .map((origin) => origin.trim())
         .filter(Boolean),
