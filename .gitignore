@@ -1,3 +1,13 @@
 .env
 node_modules/
 temp/
+
+# Local implementation notes; do not publish these generated guides.
+/00_START_HERE.md
+/ENHANCEMENT_README.md
+/IMPLEMENTATION_SUMMARY.md
+/QUICK_IMPLEMENTATION_GUIDE.md
+/QUICK_REFERENCE.md
+/SKILL_GAPS_ENHANCEMENT.md
+/VERIFICATION_CHECKLIST.md
+/VISUAL_SUMMARY.md
