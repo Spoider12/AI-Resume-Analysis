@@ -1,6 +1,8 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const authRoutes = require("./routes/auth.route");
+const interviewRoutes = require("./routes/interview.route");
 
 const app = express();
 
@@ -22,8 +24,7 @@ app.use(cors({
     credentials: true
 }));
 
-const authRoutes = require("./routes/auth.route");
-const interviewRoutes = require("./routes/interview.route");
+// Register API endpoints
 app.use("/api/auth", authRoutes);
 app.use("/api/interview", interviewRoutes);
 app.use((req, res) => {
