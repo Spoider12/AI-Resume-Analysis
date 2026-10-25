@@ -101,7 +101,7 @@ The resume upload currently accepts PDF files up to 3 MB. Alternatively, provide
 | `GET` | `/api/auth/logout` | Log out | No |
 | `GET` | `/api/auth/get-me` | Get the logged-in user | Yes |
 | `POST` | `/api/interview/` | Generate an interview report | Yes |
-| `GET` | `/api/interview/` | List the user's reports | Yes |
+
 | `GET` | `/api/interview/report/:interviewId` | Get a report by ID | Yes |
 
 The report-generation endpoint expects `multipart/form-data` with:
