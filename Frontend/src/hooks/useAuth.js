@@ -1,6 +1,7 @@
 import {useContext} from "react";
 import {AuthContext} from "../auth/auth.context";
 import {register,login,logout} from "../services/auth.api"
+import { toast } from "react-toastify";
 
 
 export const useAuth = () =>{
@@ -13,13 +14,18 @@ export const useAuth = () =>{
             const data = await login({email,password})
             if (!data?.user) {
                 setUser(null)
+                toast.error("Login failed. Please check your email and password.")
                 return false
             }
 
             setUser(data.user)
             return true
-        } catch(err){
+        } catch(error){
             setUser(null)
+            const message = error.response?.status === 400 && error.response?.data?.message
+                ? error.response.data.message
+                : "Unable to log in. Please try again."
+            toast.error(message)
             return false
         } finally{
             setLoading(false)
@@ -37,7 +43,7 @@ export const useAuth = () =>{
 
             setUser(data.user)
             return true
-        } catch (err){
+        } catch{
             setUser(null)
             return false
         } finally{setLoading(false)}
@@ -48,7 +54,7 @@ export const useAuth = () =>{
         try{
             await logout()
             setUser(null)
-        } catch(err){
+        } catch{
             setUser(null)
         } finally{
             setLoading(false)
