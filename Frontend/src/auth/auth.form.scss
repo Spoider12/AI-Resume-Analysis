@@ -21,6 +21,27 @@ main{
         gap: 0.75rem;
     }
 
+    .auth-submit{
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+
+        &:disabled{
+            cursor: wait;
+            opacity: 0.8;
+        }
+    }
+
+    .auth-spinner{
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid rgba(255, 255, 255, 0.45);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: auth-spinner-rotation 0.7s linear infinite;
+    }
+
     .input-group{
         display: flex;
         flex-direction: column;
@@ -40,5 +61,17 @@ main{
     a{
         color: #e1034d;
         text-decoration: none;
+    }
+}
+
+@keyframes auth-spinner-rotation{
+    to{
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .auth-spinner{
+        animation: none;
     }
 }

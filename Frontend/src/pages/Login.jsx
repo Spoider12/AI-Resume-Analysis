@@ -1,4 +1,4 @@
-import React,{useState} from 'react'
+import {useState} from 'react'
 import '../auth/auth.form.scss'
 import { useNavigate, Link } from 'react-router'
 import {useAuth} from "../hooks/useAuth.js"
@@ -21,14 +21,11 @@ const Login = () => {
     }
   }
 
-  if(loading){
-    return (<main><h1>Loading......</h1></main>)
-  }
   return (
     <main>
       <div className="form-container">
         <h1>Login</h1>
-        <form onSubmit={handleSubmit}> 
+        <form onSubmit={handleSubmit} aria-busy={loading}>
             <div className="input-group">
                 <label htmlFor="email">Email</label>
                 <input
@@ -41,7 +38,10 @@ const Login = () => {
                 onChange={(e) =>{setPassword(e.target.value)}}
                  type="password" id="password" name="password" placeholder="Enter your Password" />
             </div>
-            <button className='button primary-button' type="submit">Login</button>
+            <button className='button primary-button auth-submit' type="submit" disabled={loading}>
+              {loading && <span className="auth-spinner" aria-hidden="true" />}
+              <span>{loading ? "Signing you in..." : "Login"}</span>
+            </button>
         </form>
         <p>Don't have an account? <Link to={"/register"} >Register</Link> </p>
         </div>  

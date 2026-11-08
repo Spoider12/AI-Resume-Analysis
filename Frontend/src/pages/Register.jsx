@@ -1,6 +1,7 @@
 import {useState} from 'react'
 import {useNavigate, Link} from 'react-router'
 import { useAuth } from '../hooks/useAuth'
+import '../auth/auth.form.scss'
 const Register = () => {
   const navigate  = useNavigate()
   const [username, setUsername] = useState("")
@@ -16,15 +17,12 @@ const Register = () => {
       navigate("/login")
     }
     }
-    if(loading){
-    return (<main><h1>Loading......</h1></main>)
-  }
   return (
     <div>
       <main>
         <div className="form-container">
           <h1>Register</h1>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} aria-busy={loading}>
             <div className="input-group">
               <label htmlFor="username">Username</label>
               <input
@@ -43,7 +41,10 @@ const Register = () => {
               onChange={(e) => {setPassword(e.target.value)}}
                type="password" id="password" name="password" placeholder="Type your Password" />
             </div>
-            <button className='button primary-button' type="submit">Register</button>
+            <button className='button primary-button auth-submit' type="submit" disabled={loading}>
+              {loading && <span className="auth-spinner" aria-hidden="true" />}
+              <span>{loading ? "Creating your account..." : "Register"}</span>
+            </button>
           </form>
           <p> Already Have an Account <Link to={"/login"} >Login</Link> </p>
         </div>
