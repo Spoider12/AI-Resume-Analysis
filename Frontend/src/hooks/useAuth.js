@@ -43,8 +43,15 @@ export const useAuth = () =>{
 
             setUser(data.user)
             return true
-        } catch{
+        } catch(error){
             setUser(null)
+            const message = error.response?.status === 400 && error.response?.data?.message
+                ? error.response.data.message
+                : "Unable to register. Please try again."
+            toast.error(message)
+            if (message === "User already exists") {
+                return "already-exists"
+            }
             return false
         } finally{setLoading(false)}
     }

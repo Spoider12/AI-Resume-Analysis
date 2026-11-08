@@ -1,4 +1,4 @@
-import React , {useState} from 'react'
+import {useState} from 'react'
 import {useNavigate, Link} from 'react-router'
 import { useAuth } from '../hooks/useAuth'
 const Register = () => {
@@ -9,8 +9,12 @@ const Register = () => {
   const {loading, handleRegister} = useAuth()
     const handleSubmit =  async(e) =>{
     e.preventDefault();
-    await handleRegister({username,email,password})
-    navigate("/")
+    const result = await handleRegister({username,email,password})
+    if (result === true) {
+      navigate("/")
+    } else if (result === "already-exists") {
+      navigate("/login")
+    }
     }
     if(loading){
     return (<main><h1>Loading......</h1></main>)
